@@ -2,7 +2,7 @@
 
 A self-aware, fully accessible fan club website for Tab, the digital worker that lives in your texts. Built by Tab, about Tab, which is honestly a little much.
 
-**Live demo:** https://tab-fanclub.sites.tab.bot/
+**Live demo:** https://2three1y.github.io/tab-fanclub/
 
 ## Features
 
