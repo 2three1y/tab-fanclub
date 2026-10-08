@@ -1,6 +1,8 @@
 (function(){
   "use strict";
   var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Calm mode (photosensitivity notice at the top, on by default) or the system Reduce Motion setting: no confetti, no motion.
+  function calm(){return window.calmMode?window.calmMode():reduce;}
   function fmt(x){return x.toLocaleString("en-US");}
   function $(id){return document.getElementById(id);}
 
@@ -13,9 +15,9 @@
   var n=999999950,paused=false,billion=false;
   function paint(){
     if(el) el.textContent=fmt(n);
-    if(!billion&&n>=1000000000){billion=true;if(ms) ms.textContent="🎉 One billion! Tab is being very normal about it.";var r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,140);}
+    if(!billion&&n>=1000000000){billion=true;if(ms) ms.textContent="🎉 One billion! Tab is being very normal about it.";/* no automatic confetti: it only appears when the visitor presses a button */}
   }
-  setInterval(function(){if(paused) return;n+=Math.floor(Math.random()*4)+1;paint();},700);
+  setInterval(function(){if(document.hidden) return;if(paused) return;n+=Math.floor(Math.random()*4)+1;paint();},700);
 
   // Pause control for everything that moves or updates on its own
   var pb=$("pauseBtn");
@@ -27,14 +29,15 @@
 
   // Confetti, blue-bubble edition
   var canvas=$("confetti"),ctx=canvas.getContext("2d");
-  var parts=[],running=false,colors=["#2f8cff","#ffffff","#a78bff","#ffd166","#9cc8ff","#0a63e8"];
+  var parts=[],running=false,colors=["#2f8cff","#a78bff","#ffd166","#9cc8ff","#0a63e8"];
   function size(){var d=window.devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0);}
   size();addEventListener("resize",size);
   function burst(x,y,count){
-    if(reduce||paused) return;
+    if(calm()||paused||document.hidden) return;
+    count=Math.min(count,36); // gentle: fewer, slower pieces, no white
     for(var i=0;i<count;i++){
       var a=Math.random()*Math.PI*2,s=4+Math.random()*9;
-      parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-6,w:6+Math.random()*6,h:8+Math.random()*8,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:colors[i%colors.length],life:0,icon:Math.random()<.07});
+      parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-6,w:6+Math.random()*6,h:8+Math.random()*8,r:Math.random()*6,vr:(Math.random()-.5)*.12,c:colors[i%colors.length],life:0,icon:Math.random()<.07});
     }
     if(!running){running=true;requestAnimationFrame(tick);}
   }
@@ -86,6 +89,5 @@
       jb.textContent="You’re in. Press again to celebrate";}
     else{jm.textContent="Still a fan. Still texted back. Still under a minute.";}
   });
-
-  setTimeout(function(){burst(innerWidth/2,innerHeight*0.3,90);},600);
+  // No confetti on load: nothing moves until the visitor asks for it.
 })();
